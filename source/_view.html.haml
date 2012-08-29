@@ -1,0 +1,92 @@
+%section
+  %h3 Next, we'll extract all the DOM stuff
+
+  :code
+    $(document).ready(function() {
+      var statuses = new Statuses();
+
+      $('#new-status form').submit(function(e) {
+        e.preventDefault();
+
+        statuses.add({
+          text: $('#new-status textarea').val(),
+          success: function(data) {
+            $('#statuses ul').append('<li>' + data.text + '</li>');
+            $('#new-status textarea').val('');
+          }
+        });
+      });
+    });
+
+%section
+  :code
+    var NewStatusView = function(options) {
+      var statuses = options.statuses;
+  
+      $('#new-status form').submit(function(e) {
+        e.preventDefault();
+
+        statuses.add({
+          text: $('#new-status textarea').val(),
+          success: function(data) {
+            $('#statuses ul').append('<li>' + data.text + '</li>');
+            $('#new-status textarea').val('');
+          }
+        });
+      });
+    };
+
+    $(document).ready(function() {
+      var statuses = new Statuses();
+      new NewStatusView({ statuses: statuses });
+    });
+
+%section
+  :code
+     var NewStatusView = function(options) {
+       this.statuses = options.statuses;
+
+       var add = $.proxy(this.addStatus, this);
+       $('#new-status form').submit(add);
+     };
+     NewStatusView.prototype = {
+       addStatus: function(e) {
+         e.preventDefault();
+     
+         this.statuses.add({
+           text: $('#new-status textarea').val(),
+           success: function(data) {
+             $('#statuses ul').append('<li>' + data.text + '</li>');
+             $('#new-status textarea').val('');
+           }
+         });
+       }
+     }
+
+%section
+  :code
+     var NewStatusView = function(options) {
+       this.statuses = options.statuses;
+
+       var add = $.proxy(this.addStatus, this);
+       $('#new-status form').submit(add);
+     };
+     NewStatusView.prototype = {
+       addStatus: function(e) {
+         e.preventDefault();
+     
+         this.statuses.add({
+           text: $('#new-status textarea').val(),
+           success: function(data) {
+             this.appendStatus(data.text);
+             this.clearInput();
+           }
+         });
+       },
+       appendStatus: function(text) {
+         $('#statuses ul').append('<li>' + data.text + '</li>');
+       },
+       clearInput: function() {
+         $('#new-status textarea').val('');
+       }
+     }

@@ -1,0 +1,50 @@
+---
+title: JS MV&#x2605;
+---
+
+%section
+  %h1 JS MV&#x2605;
+
+%section
+  :markdown
+    ## What is MV\*?
+
+    - **Models:** Data containers and business logic
+    - **Views:** Data representation and user input
+    - **\*:** Whatever glue the framework chooses to use
+
+%section
+  :markdown
+    ## Why MV\*?
+
+    - Easier to write
+    - Easier to understand
+    - Easier to test
+
+
+%section
+  %h2 How?
+
+  :code
+    $(document).ready(function() {
+      $('#new-status').submit(function(e) {
+        e.preventDefault();
+
+        $.ajax({
+          url: '/status',
+          type: 'POST',
+          dataType: 'json',
+          data: { text: $(this).find('textarea').val() },
+          success: function(data) {
+            $('#statuses').append('<li>' + data.text + '</li>');
+            $(this).find('textarea').val('');
+          }
+        });
+      });
+    });
+
+%section= partial 'separation'
+
+%section= partial 'view'
+
+%section= partial 'events'

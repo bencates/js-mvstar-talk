@@ -1,0 +1,72 @@
+%section
+  :markdown
+    ## Events as Glue
+
+    * Browser uses pub/sub model to communicate with your scripts
+    * We'll adopt that model for communicating between different parts of the scripts
+    * Meet `Backbone.Events`
+
+    ---
+
+    So now this goes at the top of our scope:
+
+        var events = _.clone(Backbone.Events);
+
+%section
+  %h4 So we go from this...
+  :code
+    var NewStatusView = function(options) {
+      this.statuses = options.statuses;
+
+      var add = $.proxy(this.addStatus, this);
+      $('#new-status form').submit(add);
+    };
+    NewStatusView.prototype.addStatus = function(e) {
+      e.preventDefault();
+
+      var that = this;
+
+      this.statuses.add({
+        text: $('#new-status textarea').val(),
+        success: function(data) {
+          that.appendStatus(data.text);
+          that.clearInput();
+        }
+      });
+    };
+
+%section
+  %h4 ...to this.
+  :code
+    var NewStatusView = function(options) {
+      this.statuses = options.statuses;
+
+      events.on('status:add', this.appendStatus, this);
+      events.on('status:add', this.clearInput, this);
+
+      var add = $.proxy(this.addStatus, this);
+      $('#new-status form').submit(add);
+    };
+    NewStatusView.prototype.addStatus = function(e) {
+      e.preventDefault();
+
+      this.statuses.add($('#new-status textarea').val());
+    };
+
+%section
+  %h4 And we can move the callback back into the model
+  :code
+    Statuses.prototype = {
+      add: function(text) {
+        $.ajax({
+          url: '/status',
+          type: 'POST',
+          dataType: 'json',
+          data: { text: text },
+          success: function(data) {
+            events.trigger('status:add', data.text);
+          }
+        });
+      }
+    };
+

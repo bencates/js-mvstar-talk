@@ -1,0 +1,40 @@
+!!!5
+%html
+  %head
+    %meta( charset="utf-8" )
+
+    / Always force latest IE rendering engine or request Chrome Frame
+    %meta( content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" )
+
+    = meta_tag "yes", name: "apple-mobile-web-app-capable"
+    = meta_tag "black-translucent", name: "apple-mobile-web-app-status-bar-style"
+
+    / Use title if it's in the page YAML frontmatter
+    %title= data.page.title || "reveal.js - HTML5 Presentations"
+
+    = stylesheet_link_tag "http://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic"
+    = stylesheet_link_tag "reset", "main", "lib/zenburn"
+    = stylesheet_link_tag "print", media: "print"
+
+  %body{ class: page_classes }
+
+    .reveal
+
+      / Used to fade in a background when a specific slide state is reached
+      .slide-background
+
+      / Any section element inside of this container is displayed as a slide
+      .slides= yield
+
+      / The navigational controls UI
+      %aside.controls
+        %a.left{ href: "#" } &#x25C4;
+        %a.right{ href: "#" } &#x25BA;
+        %a.up{ href: "#" } &#x25B2;
+        %a.down{ href: "#" } &#x25BC;
+
+      / Presentation progress bar
+      .progress
+        %span
+
+    = javascript_include_tag "all"

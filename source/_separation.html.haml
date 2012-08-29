@@ -1,0 +1,83 @@
+%section
+  %h3 Let's pull out all the data handling stuff
+
+  :code
+    $(document).ready(function() {
+      $('#new-status').submit(function(e) {
+        e.preventDefault();
+
+        $.ajax({
+          url: '/status',
+          type: 'POST',
+          dataType: 'json',
+          data: { text: $(this).find('textarea').val() },
+          success: function(data) {
+            $('#statuses').append('<li>' + data.text + '</li>');
+            $(this).find('textarea').val('');
+          }
+        });
+      });
+    });
+
+%section
+  :code
+    function addStatus() {
+      $.ajax({
+        url: '/status',
+        type: 'POST',
+        dataType: 'json',
+        data: { text: $('#new-status textarea').val() },
+        success: function(data) {
+          $('#statuses ul').append('<li>' + data.text + '</li>');
+          $('#new-status textarea').val('');
+        }
+      });
+    }
+
+%section
+  :code
+    function addStatus(options) {
+      $.ajax({
+        url: '/status',
+        type: 'POST',
+        dataType: 'json',
+        data: { text: options.text },
+        success: options.success
+      });
+    }
+
+%section
+  :code
+    var Statuses = function() {};
+    Statuses.prototype = {
+      add: function(options) {
+        $.ajax({
+          url: '/status',
+          type: 'POST',
+          dataType: 'json',
+          data: { text: options.text },
+          success: options.success
+        });
+      }
+    }
+
+%section
+  %p And now our <code>$(document).ready()</code> looks like this:
+
+  :code
+    $(document).ready(function() {
+      var statuses = new Statuses();
+
+      $('#new-status form').submit(function(e) {
+        e.preventDefault();
+
+        statuses.add({
+          text: $('#new-status textarea').val(),
+          success: function(data) {
+            $('#statuses ul').append('<li>' + data.text + '</li>');
+            $('#new-status textarea').val('');
+          }
+        });
+      });
+    });
+
