@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8' />
+    <!-- Always force latest IE rendering engine or request Chrome Frame -->
+    <meta content='IE=edge,chrome=1' http-equiv='X-UA-Compatible' />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- Use title if it's in the page YAML frontmatter -->
+    <title>JS MV&#x2605;</title>
+    <link href="http://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" media="screen" rel="stylesheet" type="text/css" />
+    <link href="/stylesheets/reset.css" media="screen" rel="stylesheet" type="text/css" />
+    <link href="/stylesheets/main.css" media="screen" rel="stylesheet" type="text/css" />
+    <link href="/stylesheets/lib/zenburn.css" media="screen" rel="stylesheet" type="text/css" />
+    <link href="/stylesheets/print.css" media="print" rel="stylesheet" type="text/css" />
+  </head>
+  <body class='index'>
+    <div class='reveal'>
+      <!-- Used to fade in a background when a specific slide state is reached -->
+      <div class='slide-background'></div>
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class='slides'><section>
+  <h1>JS MV&#x2605;</h1>
+</section>
+<section>
+  <h2 id='what_is_mv'>What is MV*?</h2>
+  
+  <ul>
+  <li><strong>Models:</strong> Data containers and business logic</li>
+  
+  <li><strong>Views:</strong> Data representation and user input</li>
+  
+  <li><strong>*:</strong> Whatever glue the framework chooses to use</li>
+  </ul>
+</section>
+<section>
+  <h2 id='why_mv'>Why MV*?</h2>
+  
+  <ul>
+  <li>Easier to write</li>
+  
+  <li>Easier to understand</li>
+  
+  <li>Easier to test</li>
+  </ul>
+</section>
+<section>
+  <h2>How?</h2>
+  <pre><code>$(document).ready(function() {&#x000A;  $('#new-status').submit(function(e) {&#x000A;    e.preventDefault();&#x000A;&#x000A;    $.ajax({&#x000A;      url: '/status',&#x000A;      type: 'POST',&#x000A;      dataType: 'json',&#x000A;      data: { text: $(this).find('textarea').val() },&#x000A;      success: function(data) {&#x000A;        $('#statuses').append('&lt;li&gt;' + data.text + '&lt;/li&gt;');&#x000A;        $(this).find('textarea').val('');&#x000A;      }&#x000A;    });&#x000A;  });&#x000A;});&#x000A;</code></pre>
+</section>
+<section><section>
+  <h3>Let's pull out all the data handling stuff</h3>
+  <pre><code>$(document).ready(function() {&#x000A;  $('#new-status').submit(function(e) {&#x000A;    e.preventDefault();&#x000A;&#x000A;    $.ajax({&#x000A;      url: '/status',&#x000A;      type: 'POST',&#x000A;      dataType: 'json',&#x000A;      data: { text: $(this).find('textarea').val() },&#x000A;      success: function(data) {&#x000A;        $('#statuses').append('&lt;li&gt;' + data.text + '&lt;/li&gt;');&#x000A;        $(this).find('textarea').val('');&#x000A;      }&#x000A;    });&#x000A;  });&#x000A;});&#x000A;</code></pre>
+</section>
+<section>
+  <pre><code>function addStatus() {&#x000A;  $.ajax({&#x000A;    url: '/status',&#x000A;    type: 'POST',&#x000A;    dataType: 'json',&#x000A;    data: { text: $('#new-status textarea').val() },&#x000A;    success: function(data) {&#x000A;      $('#statuses ul').append('&lt;li&gt;' + data.text + '&lt;/li&gt;');&#x000A;      $('#new-status textarea').val('');&#x000A;    }&#x000A;  });&#x000A;}&#x000A;</code></pre>
+</section>
+<section>
+  <pre><code>function addStatus(options) {&#x000A;  $.ajax({&#x000A;    url: '/status',&#x000A;    type: 'POST',&#x000A;    dataType: 'json',&#x000A;    data: { text: options.text },&#x000A;    success: options.success&#x000A;  });&#x000A;}&#x000A;</code></pre>
+</section>
+<section>
+  <pre><code>var Statuses = function() {};&#x000A;Statuses.prototype = {&#x000A;  add: function(options) {&#x000A;    $.ajax({&#x000A;      url: '/status',&#x000A;      type: 'POST',&#x000A;      dataType: 'json',&#x000A;      data: { text: options.text },&#x000A;      success: options.success&#x000A;    });&#x000A;  }&#x000A;}&#x000A;</code></pre>
+</section>
+<section>
+  <p>And now our <code>$(document).ready()</code> looks like this:</p>
+  <pre><code>$(document).ready(function() {&#x000A;  var statuses = new Statuses();&#x000A;&#x000A;  $('#new-status form').submit(function(e) {&#x000A;    e.preventDefault();&#x000A;&#x000A;    statuses.add({&#x000A;      text: $('#new-status textarea').val(),&#x000A;      success: function(data) {&#x000A;        $('#statuses ul').append('&lt;li&gt;' + data.text + '&lt;/li&gt;');&#x000A;        $('#new-status textarea').val('');&#x000A;      }&#x000A;    });&#x000A;  });&#x000A;});</code></pre>
+</section></section>
+<section><section>
+  <h3>Next, we'll extract all the DOM stuff</h3>
+  <pre><code>$(document).ready(function() {&#x000A;  var statuses = new Statuses();&#x000A;&#x000A;  $('#new-status form').submit(function(e) {&#x000A;    e.preventDefault();&#x000A;&#x000A;    statuses.add({&#x000A;      text: $('#new-status textarea').val(),&#x000A;      success: function(data) {&#x000A;        $('#statuses ul').append('&lt;li&gt;' + data.text + '&lt;/li&gt;');&#x000A;        $('#new-status textarea').val('');&#x000A;      }&#x000A;    });&#x000A;  });&#x000A;});&#x000A;</code></pre>
+</section>
+<section>
+  <pre><code>var NewStatusView = function(options) {&#x000A;  var statuses = options.statuses;&#x000A;&#x000A;  $('#new-status form').submit(function(e) {&#x000A;    e.preventDefault();&#x000A;&#x000A;    statuses.add({&#x000A;      text: $('#new-status textarea').val(),&#x000A;      success: function(data) {&#x000A;        $('#statuses ul').append('&lt;li&gt;' + data.text + '&lt;/li&gt;');&#x000A;        $('#new-status textarea').val('');&#x000A;      }&#x000A;    });&#x000A;  });&#x000A;};&#x000A;&#x000A;$(document).ready(function() {&#x000A;  var statuses = new Statuses();&#x000A;  new NewStatusView({ statuses: statuses });&#x000A;});&#x000A;</code></pre>
+</section>
+<section>
+  <pre><code> var NewStatusView = function(options) {&#x000A;   this.statuses = options.statuses;&#x000A;&#x000A;   var add = $.proxy(this.addStatus, this);&#x000A;   $('#new-status form').submit(add);&#x000A; };&#x000A; NewStatusView.prototype = {&#x000A;   addStatus: function(e) {&#x000A;     e.preventDefault();&#x000A; &#x000A;     this.statuses.add({&#x000A;       text: $('#new-status textarea').val(),&#x000A;       success: function(data) {&#x000A;         $('#statuses ul').append('&lt;li&gt;' + data.text + '&lt;/li&gt;');&#x000A;         $('#new-status textarea').val('');&#x000A;       }&#x000A;     });&#x000A;   }&#x000A; }&#x000A;</code></pre>
+</section>
+<section>
+  <pre><code> var NewStatusView = function(options) {&#x000A;   this.statuses = options.statuses;&#x000A;&#x000A;   var add = $.proxy(this.addStatus, this);&#x000A;   $('#new-status form').submit(add);&#x000A; };&#x000A; NewStatusView.prototype = {&#x000A;   addStatus: function(e) {&#x000A;     e.preventDefault();&#x000A; &#x000A;     this.statuses.add({&#x000A;       text: $('#new-status textarea').val(),&#x000A;       success: function(data) {&#x000A;         this.appendStatus(data.text);&#x000A;         this.clearInput();&#x000A;       }&#x000A;     });&#x000A;   },&#x000A;   appendStatus: function(text) {&#x000A;     $('#statuses ul').append('&lt;li&gt;' + data.text + '&lt;/li&gt;');&#x000A;   },&#x000A;   clearInput: function() {&#x000A;     $('#new-status textarea').val('');&#x000A;   }&#x000A; }</code></pre>
+</section></section>
+<section><section>
+  <h2 id='events_as_glue'>Events as Glue</h2>
+  
+  <ul>
+  <li>Browser uses pub/sub model to communicate with your scripts</li>
+  
+  <li>We&#8217;ll adopt that model for communicating between different parts of the scripts</li>
+  
+  <li>Meet <code>Backbone.Events</code></li>
+  </ul>
+  <hr />
+  <p>So now this goes at the top of our scope:</p>
+  
+  <pre><code>var events = _.clone(Backbone.Events);</code></pre>
+</section>
+<section>
+  <h4>So we go from this...</h4>
+  <pre><code>var NewStatusView = function(options) {&#x000A;  this.statuses = options.statuses;&#x000A;&#x000A;  var add = $.proxy(this.addStatus, this);&#x000A;  $('#new-status form').submit(add);&#x000A;};&#x000A;NewStatusView.prototype.addStatus = function(e) {&#x000A;  e.preventDefault();&#x000A;&#x000A;  var that = this;&#x000A;&#x000A;  this.statuses.add({&#x000A;    text: $('#new-status textarea').val(),&#x000A;    success: function(data) {&#x000A;      that.appendStatus(data.text);&#x000A;      that.clearInput();&#x000A;    }&#x000A;  });&#x000A;};&#x000A;</code></pre>
+</section>
+<section>
+  <h4>...to this.</h4>
+  <pre><code>var NewStatusView = function(options) {&#x000A;  this.statuses = options.statuses;&#x000A;&#x000A;  events.on('status:add', this.appendStatus, this);&#x000A;  events.on('status:add', this.clearInput, this);&#x000A;&#x000A;  var add = $.proxy(this.addStatus, this);&#x000A;  $('#new-status form').submit(add);&#x000A;};&#x000A;NewStatusView.prototype.addStatus = function(e) {&#x000A;  e.preventDefault();&#x000A;&#x000A;  this.statuses.add($('#new-status textarea').val());&#x000A;};&#x000A;</code></pre>
+</section>
+<section>
+  <h4>And we can move the callback back into the model</h4>
+  <pre><code>Statuses.prototype = {&#x000A;  add: function(text) {&#x000A;    $.ajax({&#x000A;      url: '/status',&#x000A;      type: 'POST',&#x000A;      dataType: 'json',&#x000A;      data: { text: text },&#x000A;      success: function(data) {&#x000A;        events.trigger('status:add', data.text);&#x000A;      }&#x000A;    });&#x000A;  }&#x000A;};</code></pre>
+</section></section></div>
+      <!-- The navigational controls UI -->
+      <aside class='controls'>
+        <a class='left' href='#'>&#x25C4;</a>
+        <a class='right' href='#'>&#x25BA;</a>
+        <a class='up' href='#'>&#x25B2;</a>
+        <a class='down' href='#'>&#x25BC;</a>
+      </aside>
+      <!-- Presentation progress bar -->
+      <div class='progress'>
+        <span></span>
+      </div>
+    </div>
+    <script src="/javascripts/all.js" type="text/javascript"></script>
+  </body>
+</html>
