@@ -1,5 +1,3 @@
-require "lib/haml_code_filter"
-
 ### 
 # Compass
 ###

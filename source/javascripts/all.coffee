@@ -7,7 +7,18 @@ Reveal.addEventListener 'customevent', ->
 
 # Fires each time a new slide is activated
 Reveal.addEventListener 'slidechanged', (event) ->
-  # event.previousSlide, event.currentSlide, event.indexh, event.indexv
+  # Log speaker notes to the console
+  $slide = $(event.currentSlide)
+  window.slide = $slide
+  title = $slide.find('h1,h2,h3,h4,h5,h6').first().text()
+  notes = $slide.find('aside.notes').text()
+  console.log("""
+  ==========================================
+  #{title}
+  ------------------------------------------
+  #{notes}
+  ==========================================
+  """)
 
 # Full list of configuration options available here:
 # https:#github.com/hakimel/reveal.js#configuration
