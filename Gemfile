@@ -1,6 +1,4 @@
 source :rubygems
 
 gem "middleman", "~>3.0.0"
-
-gem "rake"
-gem "git"
+gem "middleman-deploy", :github => "bencates/middleman-deploy"

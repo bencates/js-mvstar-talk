@@ -63,3 +63,7 @@ configure :build do
   # Or use a different image path
   # set :http_path, "/Content/images/"
 end
+
+activate :deploy do |config|
+  config.method = :git
+end
