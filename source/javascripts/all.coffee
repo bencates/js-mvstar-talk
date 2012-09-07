@@ -1,6 +1,15 @@
 #= require_tree ./lib
 #= require reveal
 
+initialTime = Date.now()
+elapsedTime = (start) ->
+  diff = Date.now() - start
+  diff = Math.round(diff / 1000)
+  seconds = diff % 60
+  seconds = "0#{seconds}" if seconds < 10
+  minutes = Math.floor(diff / 60)
+  "#{minutes}:#{seconds}"
+
 # Fires when a slide with data-state=customevent is activated
 Reveal.addEventListener 'customevent', ->
   console.log '"customevent" has fired'
@@ -12,9 +21,10 @@ Reveal.addEventListener 'slidechanged', (event) ->
   window.slide = $slide
   title = $slide.find('h1,h2,h3,h4,h5,h6').first().text()
   notes = $slide.find('aside.notes').text()
+  window.clear?()
   console.log("""
   ==========================================
-  #{title}
+  #{elapsedTime(initialTime)} - #{title}
   ------------------------------------------
   #{notes}
   ==========================================

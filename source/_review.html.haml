@@ -1,0 +1,67 @@
+%section
+  %h2 And we're done!
+
+%section
+  %h3 Model
+
+  :code
+    var Statuses = function() {};
+    Statuses.prototype = {
+      add: function(options) {
+        $.ajax({
+          url: '/status',
+          type: 'POST',
+          dataType: 'json',
+          data: { text: options.text },
+          success: options.success
+        });
+      }
+    }
+
+%section
+  %h3 View for form
+
+  :code
+    var NewStatusView = function(options) {
+      this.el = options.el;
+      this.statuses = options.statuses;
+
+      events.on('status:add', this.clearInput, this);
+
+      var add = $.proxy(this.addStatus, this);
+      this.el.find('form').submit(add);
+    };
+    NewStatusView.prototype = {
+      addStatus: function(e) {
+        e.preventDefault();
+
+        this.statuses.add(this.el.find('textarea').val());
+      },
+      clearInput: function() {
+        this.el.find('textarea').val('');
+      }
+    }
+
+%section
+  %h3 View for list
+
+  :code
+    var StatusesView = function(options) {
+      this.el = options.el
+      events.on('status:add', this.appendStatus, this);
+    };
+    StatusesView.prototype = {
+      appendStatus: function(text) {
+        this.el.append('<li>' + text + '</li>');
+      }
+    }
+
+%section
+  %h3 Short initializer
+
+  :code
+    $(document).ready(function() {
+      var statuses = new Statuses();
+      new NewStatusView({ el: $('#new-status'), statuses: statuses });
+      new StatusesView({ el: $('#statuses ul') });
+    });

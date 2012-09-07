@@ -1,0 +1,115 @@
+%section
+  %h3 Now we can break this behaviors into views
+
+  :code
+    var NewStatusView = function(options) {
+      this.statuses = options.statuses;
+
+      events.on('status:add', this.appendStatus, this);
+      events.on('status:add', this.clearInput, this);
+
+      var add = $.proxy(this.addStatus, this);
+      $('#new-status form').submit(add);
+    };
+    NewStatusView.prototype = {
+      addStatus: function(e) {
+        e.preventDefault();
+
+        this.statuses.add($('#new-status textarea').val());
+      },
+      appendStatus: function(text) {
+        $('#statuses ul').append('<li>' + data.text + '</li>');
+      },
+      clearInput: function() {
+        $('#new-status textarea').val('');
+      }
+    }
+
+  :notes
+    View has form and list
+
+    Two concerns - two views
+
+%section
+  %h3 we pull out the &lt;ul&gt; management
+
+  :code
+    var StatusesView = function() {
+      events.on('status:add', this.appendStatus, this);
+    };
+    StatusesView.prototype = {
+      appendStatus: function(text) {
+        $('#statuses ul').append('<li>' + text + '</li>');
+      }
+    }
+
+%section
+  %h3 and we're left with the form
+
+  :code
+    var NewStatusView = function(options) {
+      this.statuses = options.statuses;
+
+      events.on('status:add', this.clearInput, this);
+
+      var add = $.proxy(this.addStatus, this);
+      $('#new-status form').submit(add);
+    };
+    NewStatusView.prototype = {
+      addStatus: function(e) {
+        e.preventDefault();
+
+        this.statuses.add($('#new-status textarea').val());
+      },
+      clearInput: function() {
+        $('#new-status textarea').val('');
+      }
+    }
+
+%section
+  %h3 pull the element out into an invocation param
+
+  :code
+    var NewStatusView = function(options) {
+      this.el = options.el;
+      this.statuses = options.statuses;
+
+      events.on('status:add', this.clearInput, this);
+
+      var add = $.proxy(this.addStatus, this);
+      this.el.find('form').submit(add);
+    };
+    NewStatusView.prototype = {
+      addStatus: function(e) {
+        e.preventDefault();
+
+        this.statuses.add(this.el.find('textarea').val());
+      },
+      clearInput: function() {
+        this.el.find('textarea').val('');
+      }
+    }
+
+%section
+  %h3 and do the same for the new list class
+
+  :code
+    var StatusesView = function(options) {
+      this.el = options.el
+      events.on('status:add', this.appendStatus, this);
+    };
+    StatusesView.prototype = {
+      appendStatus: function(text) {
+        this.el.append('<li>' + text + '</li>');
+      }
+    }
+
+%section
+  %h3 and tweak our <code>$document('ready')</code> accordingly
+
+  :code
+    $(document).ready(function() {
+      var statuses = new Statuses();
+      new NewStatusView({ el: $('#new-status'), statuses: statuses });
+      new StatusesView({ el: $('#statuses ul') });
+    });

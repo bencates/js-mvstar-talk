@@ -1,0 +1,121 @@
+%section
+  %h2 Use a library like Backbone to suck all the boilerplate out
+
+%section
+  %h3 Model
+
+  :code
+    var Statuses = function() {};
+    Statuses.prototype = {
+      add: function(options) {
+        $.ajax({
+          url: '/status',
+          type: 'POST',
+          dataType: 'json',
+          data: { text: options.text },
+          success: options.success
+        });
+      }
+    }
+
+%section
+  %h3 ...to Backbone Model and Collection
+
+  :code
+    var Status = Backbone.Model.extend({
+      url: '/status'
+    });
+
+    var Statuses = Backbone.Collection.extend({
+      model: Status
+    }
+
+%section
+  %h3 View for form
+
+  :code
+    var NewStatusView = function(options) {
+      this.el = options.el;
+      this.statuses = options.statuses;
+
+      events.on('status:add', this.clearInput, this);
+
+      var add = $.proxy(this.addStatus, this);
+      this.el.find('form').submit(add);
+    };
+    NewStatusView.prototype = {
+      addStatus: function(e) {
+        e.preventDefault();
+
+        this.statuses.add(this.el.find('textarea').val());
+      },
+      clearInput: function() {
+        this.el.find('textarea').val('');
+      }
+    }
+
+%section
+  %h3 ...to Backbone View
+
+  :code
+    var NewStatusView = Backbone.View.extend({
+      event: { 'submit form': 'addStatus' },
+      initialize: function() {
+        this.collection.on('status:add', this.clearInput, this);
+      },
+      addStatus: function(e) {
+        e.preventDefault();
+
+        this.statuses.create(this.$('textarea').val());
+      },
+      clearInput: function() {
+        this.$('textarea').val('');
+      }
+    });
+
+  :notes
+    - pulled out event
+    - deleted autoset properties
+      - statuses becomes collection
+    - use this.$ helper
+    - changed `add` to `create`
+
+%section
+  %h3 View for list
+
+  :code
+    var StatusesView = function(options) {
+      this.el = options.el
+      events.on('status:add', this.appendStatus, this);
+    };
+    StatusesView.prototype = {
+      appendStatus: function(text) {
+        this.el.append('<li>' + text + '</li>');
+      }
+    }
+
+%section
+  %h3 ...gets the same treatment
+
+  :code
+    var StatusesView = Backbone.view.extend({
+      initialize: function() {
+        this.collection.on('status:add', this.appendStatus, this);
+      },
+      appendStatus: function(status) {
+        this.el.append('<li>' + status.escape('text') + '</li>');
+      }
+    });
+
+  :notes
+    - appendStatus gets the whole model instead of the text
+
+%section
+  %h3 Tweak the initializer to use the right parameter names
+
+  :code
+    $(document).ready(function() {
+      var statuses = new Statuses();
+      new NewStatusView({ el: $('#new-status'), collection: statuses });
+      new StatusesView({ el: $('#statuses ul'), collection: statuses });
+    });
