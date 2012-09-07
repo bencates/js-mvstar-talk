@@ -7,13 +7,15 @@
   :code
     var Statuses = function() {};
     Statuses.prototype = {
-      add: function(options) {
+      add: function(text) {
         $.ajax({
           url: '/status',
           type: 'POST',
           dataType: 'json',
-          data: { text: options.text },
-          success: options.success
+          data: { text: text },
+          success: function(data) {
+            events.trigger('status:add', data.text);
+          }
         });
       }
     }
