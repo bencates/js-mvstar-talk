@@ -10,7 +10,7 @@
     <title>JS MV&#x2605;</title>
     <link href="http://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" media="screen" rel="stylesheet" type="text/css" />
     <link href="stylesheets/reset.css?1346281809" media="screen" rel="stylesheet" type="text/css" />
-    <link href="stylesheets/main.css?1346298778" media="screen" rel="stylesheet" type="text/css" />
+    <link href="stylesheets/main.css?1347019775" media="screen" rel="stylesheet" type="text/css" />
     <link href="stylesheets/lib/zenburn.css?1346281809" media="screen" rel="stylesheet" type="text/css" />
     <link href="stylesheets/print.css?1346281809" media="print" rel="stylesheet" type="text/css" />
   </head>
@@ -20,28 +20,35 @@
       <div class='slide-background'></div>
       <!-- Any section element inside of this container is displayed as a slide -->
       <div class='slides'><section>
-  <h1>JS MV&#x2605;</h1>
+  <hgroup>
+    <h1>JS MV&#x2605;</h1>
+    <p>- or -</p>
+    <h3>Cleaner Code with Separation of Concerns</h3>
+  </hgroup>
 </section>
 <section>
-  <h2 id='what_is_mv'>What is MV*?</h2>
-  
-  <ul>
-  <li><strong>Models:</strong> Data containers and business logic</li>
-  
-  <li><strong>Views:</strong> Data representation and user input</li>
-  
-  <li><strong>*:</strong> Whatever glue the framework chooses to use</li>
-  </ul>
+  <h2>What is MV*?</h2>
+  <dl>
+    <div class='fragment'>
+      <dt>Models</dt>
+      <dd>Data containers and business logic</dd>
+    </div>
+    <div class='fragment'>
+      <dt>Views</dt>
+      <dd>Data representation and user input</dd>
+    </div>
+    <div class='fragment'>
+      <dt>Controlers, Presenters, View Models, etc.</dt>
+      <dd>Whatever glue the framework chooses to use</dd>
+    </div>
+  </dl>
 </section>
 <section>
-  <h2 id='why_mv'>Why MV*?</h2>
-  
+  <h2>Why MV*?</h2>
   <ul>
-  <li>Easier to write</li>
-  
-  <li>Easier to understand</li>
-  
-  <li>Easier to test</li>
+    <li class='fragment'>Easier to write</li>
+    <li class='fragment'>Easier to understand</li>
+    <li class='fragment'>Easier to test</li>
   </ul>
 </section>
 <section>
@@ -104,7 +111,122 @@
 <section>
   <h4>And we can move the callback back into the model</h4>
   <pre><code>Statuses.prototype = {&#x000A;  add: function(text) {&#x000A;    $.ajax({&#x000A;      url: '/status',&#x000A;      type: 'POST',&#x000A;      dataType: 'json',&#x000A;      data: { text: text },&#x000A;      success: function(data) {&#x000A;        events.trigger('status:add', data.text);&#x000A;      }&#x000A;    });&#x000A;  }&#x000A;};</code></pre>
-</section></section></div>
+</section></section>
+<section><section>
+  <h3>Now we can break this behaviors into views</h3>
+  <pre><code>var NewStatusView = function(options) {&#x000A;  this.statuses = options.statuses;&#x000A;&#x000A;  events.on('status:add', this.appendStatus, this);&#x000A;  events.on('status:add', this.clearInput, this);&#x000A;&#x000A;  var add = $.proxy(this.addStatus, this);&#x000A;  $('#new-status form').submit(add);&#x000A;};&#x000A;NewStatusView.prototype = {&#x000A;  addStatus: function(e) {&#x000A;    e.preventDefault();&#x000A;&#x000A;    this.statuses.add($('#new-status textarea').val());&#x000A;  },&#x000A;  appendStatus: function(text) {&#x000A;    $('#statuses ul').append('&lt;li&gt;' + data.text + '&lt;/li&gt;');&#x000A;  },&#x000A;  clearInput: function() {&#x000A;    $('#new-status textarea').val('');&#x000A;  }&#x000A;}&#x000A;</code></pre>
+  <aside class="notes">
+  View has form and list
+  
+  Two concerns - two views
+  </aside>
+</section>
+<section>
+  <h3>we pull out the &lt;ul&gt; management</h3>
+  <pre><code>var StatusesView = function() {&#x000A;  events.on('status:add', this.appendStatus, this);&#x000A;};&#x000A;StatusesView.prototype = {&#x000A;  appendStatus: function(text) {&#x000A;    $('#statuses ul').append('&lt;li&gt;' + text + '&lt;/li&gt;');&#x000A;  }&#x000A;}&#x000A;</code></pre>
+</section>
+<section>
+  <h3>and we're left with the form</h3>
+  <pre><code>var NewStatusView = function(options) {&#x000A;  this.statuses = options.statuses;&#x000A;&#x000A;  events.on('status:add', this.clearInput, this);&#x000A;&#x000A;  var add = $.proxy(this.addStatus, this);&#x000A;  $('#new-status form').submit(add);&#x000A;};&#x000A;NewStatusView.prototype = {&#x000A;  addStatus: function(e) {&#x000A;    e.preventDefault();&#x000A;&#x000A;    this.statuses.add($('#new-status textarea').val());&#x000A;  },&#x000A;  clearInput: function() {&#x000A;    $('#new-status textarea').val('');&#x000A;  }&#x000A;}&#x000A;</code></pre>
+</section>
+<section>
+  <h3>pull the element out into an invocation param</h3>
+  <pre><code>var NewStatusView = function(options) {&#x000A;  this.el = options.el;&#x000A;  this.statuses = options.statuses;&#x000A;&#x000A;  events.on('status:add', this.clearInput, this);&#x000A;&#x000A;  var add = $.proxy(this.addStatus, this);&#x000A;  this.el.find('form').submit(add);&#x000A;};&#x000A;NewStatusView.prototype = {&#x000A;  addStatus: function(e) {&#x000A;    e.preventDefault();&#x000A;&#x000A;    this.statuses.add(this.el.find('textarea').val());&#x000A;  },&#x000A;  clearInput: function() {&#x000A;    this.el.find('textarea').val('');&#x000A;  }&#x000A;}&#x000A;</code></pre>
+</section>
+<section>
+  <h3>and do the same for the new list class</h3>
+  <pre><code>var StatusesView = function(options) {&#x000A;  this.el = options.el&#x000A;  events.on('status:add', this.appendStatus, this);&#x000A;};&#x000A;StatusesView.prototype = {&#x000A;  appendStatus: function(text) {&#x000A;    this.el.append('&lt;li&gt;' + text + '&lt;/li&gt;');&#x000A;  }&#x000A;}&#x000A;</code></pre>
+</section>
+<section>
+  <h3>and tweak our <code>$document('ready')</code> accordingly</h3>
+  <pre><code>$(document).ready(function() {&#x000A;  var statuses = new Statuses();&#x000A;  new NewStatusView({ el: $('#new-status'), statuses: statuses });&#x000A;  new StatusesView({ el: $('#statuses ul') });&#x000A;});</code></pre>
+</section></section>
+<section><section>
+  <h2>And we're done!</h2>
+</section>
+<section>
+  <h3>Model</h3>
+  <pre><code>var Statuses = function() {};&#x000A;Statuses.prototype = {&#x000A;  add: function(options) {&#x000A;    $.ajax({&#x000A;      url: '/status',&#x000A;      type: 'POST',&#x000A;      dataType: 'json',&#x000A;      data: { text: options.text },&#x000A;      success: options.success&#x000A;    });&#x000A;  }&#x000A;}&#x000A;</code></pre>
+</section>
+<section>
+  <h3>View for form</h3>
+  <pre><code>var NewStatusView = function(options) {&#x000A;  this.el = options.el;&#x000A;  this.statuses = options.statuses;&#x000A;&#x000A;  events.on('status:add', this.clearInput, this);&#x000A;&#x000A;  var add = $.proxy(this.addStatus, this);&#x000A;  this.el.find('form').submit(add);&#x000A;};&#x000A;NewStatusView.prototype = {&#x000A;  addStatus: function(e) {&#x000A;    e.preventDefault();&#x000A;&#x000A;    this.statuses.add(this.el.find('textarea').val());&#x000A;  },&#x000A;  clearInput: function() {&#x000A;    this.el.find('textarea').val('');&#x000A;  }&#x000A;}&#x000A;</code></pre>
+</section>
+<section>
+  <h3>View for list</h3>
+  <pre><code>var StatusesView = function(options) {&#x000A;  this.el = options.el&#x000A;  events.on('status:add', this.appendStatus, this);&#x000A;};&#x000A;StatusesView.prototype = {&#x000A;  appendStatus: function(text) {&#x000A;    this.el.append('&lt;li&gt;' + text + '&lt;/li&gt;');&#x000A;  }&#x000A;}&#x000A;</code></pre>
+</section>
+<section>
+  <h3>Short initializer</h3>
+  <pre><code>$(document).ready(function() {&#x000A;  var statuses = new Statuses();&#x000A;  new NewStatusView({ el: $('#new-status'), statuses: statuses });&#x000A;  new StatusesView({ el: $('#statuses ul') });&#x000A;});</code></pre>
+</section></section>
+<section><section>
+  <h2>Use a library like Backbone to suck all the boilerplate out</h2>
+</section>
+<section>
+  <h3>Model</h3>
+  <pre><code>var Statuses = function() {};&#x000A;Statuses.prototype = {&#x000A;  add: function(options) {&#x000A;    $.ajax({&#x000A;      url: '/status',&#x000A;      type: 'POST',&#x000A;      dataType: 'json',&#x000A;      data: { text: options.text },&#x000A;      success: options.success&#x000A;    });&#x000A;  }&#x000A;}&#x000A;</code></pre>
+</section>
+<section>
+  <h3>...to Backbone Model and Collection</h3>
+  <pre><code>var Status = Backbone.Model.extend({&#x000A;  url: '/status'&#x000A;});&#x000A;&#x000A;var Statuses = Backbone.Collection.extend({&#x000A;  model: Status&#x000A;}&#x000A;</code></pre>
+</section>
+<section>
+  <h3>View for form</h3>
+  <pre><code>var NewStatusView = function(options) {&#x000A;  this.el = options.el;&#x000A;  this.statuses = options.statuses;&#x000A;&#x000A;  events.on('status:add', this.clearInput, this);&#x000A;&#x000A;  var add = $.proxy(this.addStatus, this);&#x000A;  this.el.find('form').submit(add);&#x000A;};&#x000A;NewStatusView.prototype = {&#x000A;  addStatus: function(e) {&#x000A;    e.preventDefault();&#x000A;&#x000A;    this.statuses.add(this.el.find('textarea').val());&#x000A;  },&#x000A;  clearInput: function() {&#x000A;    this.el.find('textarea').val('');&#x000A;  }&#x000A;}&#x000A;</code></pre>
+</section>
+<section>
+  <h3>...to Backbone View</h3>
+  <pre><code>var NewStatusView = Backbone.View.extend({&#x000A;  event: { 'submit form': 'addStatus' },&#x000A;  initialize: function() {&#x000A;    this.collection.on('status:add', this.clearInput, this);&#x000A;  },&#x000A;  addStatus: function(e) {&#x000A;    e.preventDefault();&#x000A;&#x000A;    this.statuses.create(this.$('textarea').val());&#x000A;  },&#x000A;  clearInput: function() {&#x000A;    this.$('textarea').val('');&#x000A;  }&#x000A;});&#x000A;</code></pre>
+  <aside class="notes">
+  - pulled out event
+  - deleted autoset properties
+    - statuses becomes collection
+  - use this.$ helper
+  - changed `add` to `create`
+  </aside>
+</section>
+<section>
+  <h3>View for list</h3>
+  <pre><code>var StatusesView = function(options) {&#x000A;  this.el = options.el&#x000A;  events.on('status:add', this.appendStatus, this);&#x000A;};&#x000A;StatusesView.prototype = {&#x000A;  appendStatus: function(text) {&#x000A;    this.el.append('&lt;li&gt;' + text + '&lt;/li&gt;');&#x000A;  }&#x000A;}&#x000A;</code></pre>
+</section>
+<section>
+  <h3>...gets the same treatment</h3>
+  <pre><code>var StatusesView = Backbone.view.extend({&#x000A;  initialize: function() {&#x000A;    this.collection.on('status:add', this.appendStatus, this);&#x000A;  },&#x000A;  appendStatus: function(status) {&#x000A;    this.el.append('&lt;li&gt;' + status.escape('text') + '&lt;/li&gt;');&#x000A;  }&#x000A;});&#x000A;</code></pre>
+  <aside class="notes">
+  - appendStatus gets the whole model instead of the text
+  </aside>
+</section>
+<section>
+  <h3>Tweak the initializer to use the right parameter names</h3>
+  <pre><code>$(document).ready(function() {&#x000A;  var statuses = new Statuses();&#x000A;  new NewStatusView({ el: $('#new-status'), collection: statuses });&#x000A;  new StatusesView({ el: $('#statuses ul'), collection: statuses });&#x000A;});</code></pre>
+</section></section>
+<section>
+  <h2 id='summary'>Summary</h2>
+  
+  <ul>
+  <li>
+  <p>We&#8217;ve gone from 16 lines to 40 (and maybe 3 or 4 files)</p>
+  </li>
+  
+  <li>
+  <p>Why is this good?</p>
+  
+  <ul>
+  <li>easy to reason about!</li>
+  
+  <li>easy to test!</li>
+  
+  <li>easy to change!</li>
+  </ul>
+  </li>
+  </ul>
+</section>
+<section>
+  <h1 id='thank_you'>Thank you</h1>
+  
+  <p>Code samples courtesy Kim Joar Bekkelund at <a href='http://github.com/kjbekkelund/writings'>github.com/kjbekkelund/writings</a></p>
+</section></div>
       <!-- The navigational controls UI -->
       <aside class='controls'>
         <a class='left' href='#'>&#x25C4;</a>
@@ -117,6 +239,6 @@
         <span></span>
       </div>
     </div>
-    <script src="javascripts/all.js?1346298777" type="text/javascript"></script>
+    <script src="javascripts/all.js?1347019774" type="text/javascript"></script>
   </body>
 </html>
