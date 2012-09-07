@@ -10,7 +10,7 @@
     <title>JS MV&#x2605;</title>
     <link href="http://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" media="screen" rel="stylesheet" type="text/css" />
     <link href="stylesheets/reset.css?1346281809" media="screen" rel="stylesheet" type="text/css" />
-    <link href="stylesheets/main.css?1347019775" media="screen" rel="stylesheet" type="text/css" />
+    <link href="stylesheets/main.css?1347026021" media="screen" rel="stylesheet" type="text/css" />
     <link href="stylesheets/lib/zenburn.css?1346281809" media="screen" rel="stylesheet" type="text/css" />
     <link href="stylesheets/print.css?1346281809" media="print" rel="stylesheet" type="text/css" />
   </head>
@@ -146,7 +146,7 @@
 </section>
 <section>
   <h3>Model</h3>
-  <pre><code>var Statuses = function() {};&#x000A;Statuses.prototype = {&#x000A;  add: function(options) {&#x000A;    $.ajax({&#x000A;      url: '/status',&#x000A;      type: 'POST',&#x000A;      dataType: 'json',&#x000A;      data: { text: options.text },&#x000A;      success: options.success&#x000A;    });&#x000A;  }&#x000A;}&#x000A;</code></pre>
+  <pre><code>var Statuses = function() {};&#x000A;Statuses.prototype = {&#x000A;  add: function(text) {&#x000A;    $.ajax({&#x000A;      url: '/status',&#x000A;      type: 'POST',&#x000A;      dataType: 'json',&#x000A;      data: { text: text },&#x000A;      success: function(data) {&#x000A;        events.trigger('status:add', data.text);&#x000A;      }&#x000A;    });&#x000A;  }&#x000A;}&#x000A;</code></pre>
 </section>
 <section>
   <h3>View for form</h3>
@@ -165,7 +165,7 @@
 </section>
 <section>
   <h3>Model</h3>
-  <pre><code>var Statuses = function() {};&#x000A;Statuses.prototype = {&#x000A;  add: function(options) {&#x000A;    $.ajax({&#x000A;      url: '/status',&#x000A;      type: 'POST',&#x000A;      dataType: 'json',&#x000A;      data: { text: options.text },&#x000A;      success: options.success&#x000A;    });&#x000A;  }&#x000A;}&#x000A;</code></pre>
+  <pre><code>var Statuses = function() {};&#x000A;Statuses.prototype = {&#x000A;  add: function(text) {&#x000A;    $.ajax({&#x000A;      url: '/status',&#x000A;      type: 'POST',&#x000A;      dataType: 'json',&#x000A;      data: { text: text },&#x000A;      success: function(data) {&#x000A;        events.trigger('status:add', data.text);&#x000A;      }&#x000A;    });&#x000A;}&#x000A;</code></pre>
 </section>
 <section>
   <h3>...to Backbone Model and Collection</h3>
@@ -239,6 +239,6 @@
         <span></span>
       </div>
     </div>
-    <script src="javascripts/all.js?1347019774" type="text/javascript"></script>
+    <script src="javascripts/all.js?1347026021" type="text/javascript"></script>
   </body>
 </html>
